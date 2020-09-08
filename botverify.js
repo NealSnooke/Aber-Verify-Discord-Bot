@@ -27,22 +27,26 @@ const helptext = "```Verify bot commands are: \n\n"
 	+"!verify uid                        Use your Aber user id (uid). e.g. abc12\n"
 	+"                                   then look for an email in your aber email\n"
 	+"!verify-code validation-code       Use the code sent to your aber email.\n\n"
-	
+	+"!verify-alumni                     Use this if you dont have a current aber email.\n\n"
 	+"Server owner only:\n\n"
 	+"!verify-channel channel-name       Restrict the specified channel to verified users.\n"
 	+"                                   Accepts channel textual name, channel mention\n" 
-	+"                                   or channel ID\n"
+	+"                                   or channel ID.\n"
+	+"!verify-channel [ALL | NONE]       ALL restricts all channels except those with \n"
+	+"                                   'verify' in the name. 'NONE' grants everyone \n"
+	+"                                   read on *all* channels [BE VERY CAREFUL!].\n"
+
 	+"!verify-role                       Reconstruct the verified role members\n"
-	+"                                   e.g. if role is accidently deleted\n"
+	+"                                   e.g. if role is accidently deleted.\n"
 	+"!verify-list email-adddress        Send the list of verified members for a server\n\n"
 	
 	+"Authorised staff only:\n\n"
 	+"!unverify discord-uid              Remove the specified users aber-verified status\n"
 	+"                                   (Applies to all servers)\n\n" 
-	+"!verify-addstaff uid                Add a new staff member\n"
-	+"Problems, suggestions, authorisation  email: nns@aber.ac.uk"
+	+"!verify-addstaff uid               Add a new staff member\n"
+	+"email: nns@aber.ac.uk              Problems, suggestions, authorisation.  "
 	+"```"
-//	+"verify-addstaff aber-uid           authorise staff member for unverify and whois"
+//	+"verify-addstaff aber-uid           authorise staff member for unverify"
 
 //this is where all the muddy points data for all servers is stored
 //var muddypoints = []; 
@@ -151,12 +155,24 @@ client.on('message', msg => {
 		//console.log("owner"+JSON.stringify(msg.guild.ownerID, null, 2));
 		//console.log("user"+JSON.stringify(msg.author.id, null, 2));
 
+		//only server owner allowed
 		if (msg.author.id != msg.guild.ownerID){
 			msg.author.send("Sorry - only server owner allowed to make verified channels!");
 			return
 		}
-		//only server owner
-		tools.makeVerifiedChannel(args[0], msg);
+		
+		if (args[0]==='ALL'){
+		
+			tools.makeAllchannelsVerified(msg);
+			
+		} else if (args[0]==='NONE'){
+		
+			tools.makeNoChannelsVerified(msg);
+			
+		} else {
+			
+			tools.makeVerifiedChannel(args[0], msg);
+		}
 		
 	} else if (command === 'unverify'){ 
 	

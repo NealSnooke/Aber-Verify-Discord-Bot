@@ -66,6 +66,51 @@ async function allocatRoleIfVerified(memberid, role, guild){
 }
 
 /*
+ *
+ */
+async function makeAllchannelsVerified(msg, server){
+	//category = msg.guild.channels.cache.get(channelName)
+	
+	server = msg.guild;
+	
+	msg.guild.channels.cache.forEach(
+		channel => {
+			if (!channel.name.includes('verify')){
+			console.log(`Channel:`+channel.name);
+			console.log(JSON.stringify(channel.permissionOverwrites, null, 2)) 
+			//  JSON.stringify(channel, null, 2));
+			setVerifyPermission(msg, channel);
+			}
+		}
+	)
+	
+	//for (var i = 0; i < server.channels.array().length; i++) {
+   // server.channels.array()[i].delete();
+}
+
+/*
+ *
+ */
+async function makeNoChannelsVerified(msg, server){
+	//category = msg.guild.channels.cache.get(channelName)
+	
+	server = msg.guild;
+	
+	msg.guild.channels.cache.forEach(
+		channel => {
+			console.log(`Channel:`+channel.name);
+			//  JSON.stringify(channel, null, 2));
+			setNoVerifyPermission(msg, channel);
+			
+		}
+	)
+	
+	//for (var i = 0; i < server.channels.array().length; i++) {
+   // server.channels.array()[i].delete();
+}
+
+
+/*
  * to set permissions on a channel
  * everyone can't read or post
  * aber-verify role can read and post
@@ -97,6 +142,13 @@ async function makeVerifiedChannel(channelName, msg){
 		}
 	}
 	
+	setVerifyPermission(msg, category);
+}
+	
+/*
+ *
+ */
+async function setVerifyPermission(msg, channel){
 	//get the verified role on this server
 	verifyRole = await getVerifyRole(msg.guild);
 	
@@ -107,11 +159,12 @@ async function makeVerifiedChannel(channelName, msg){
 		return
 	}
 	
-	console.log("making permissions for: "+channelName+" "+category);
+	console.log("making permissions for: "+channel.name+" "+channel);
 	
-	await category.overwritePermissions([
+	/*
+	await channel.overwritePermissions([
 		{
-			id: category.guild.id,
+			id: channel.guild.id,
 			deny: ['VIEW_CHANNEL', 'SEND_MESSAGES'], //everyone
 		},
 		{
@@ -119,9 +172,61 @@ async function makeVerifiedChannel(channelName, msg){
 			allow: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
 		},
 	]).then(() =>  {
-		msg.reply("Success, permissions set for *"+category.toString()+"*");
+		msg.reply("Success, permissions set for *"+channel.toString()+"*");
 	})
-	.catch(() => {console.log("failed to make permissions for: "+channelName)});
+	.catch(() => {console.log("failed to make permissions for: "+channel.name)});
+	*/
+	await channel.updateOverwrite(channel.guild.id, {VIEW_CHANNEL: false })
+	.then(() =>  {
+		msg.reply("Success, `everyone` denied read for *"+channel.toString()+"*");
+	})
+	.catch(() => {console.log("failed to everyone permissions for: "+channel.name)});;
+	
+	await channel.updateOverwrite(verifyRole, {VIEW_CHANNEL: true })
+	.then(() =>  {
+		msg.reply("Success, `verify` role read permission set for *"
+			+channel.toString()+"*");
+	})
+	.catch(() => {console.log("failed to make verify role permissions for: "
+		+channel.name)});;
+}
+
+/*
+ *
+ */
+async function setNoVerifyPermission(msg, channel){
+	//get the verified role on this server
+	verifyRole = await getVerifyRole(msg.guild);
+	
+	if (!verifyRole) {
+		msg.author.send(`Oops - I can't find the $(verifyRoleName) role` )
+		.catch(console.error);
+		
+		return
+	}
+	
+	console.log("making permissions for: "+channel.name+" "+channel);
+	/*
+	await channel.overwritePermissions([
+		{
+			id: channel.guild.id, //everyone
+		},
+		{
+			id: verifyRole,
+			allow: ['VIEW_CHANNEL', 'SEND_MESSAGES'],
+		},
+	]).then(() =>  {
+		msg.reply("Success, permissions set for *"+channel.toString()+"*");
+	})
+	.catch(() => {console.log("failed to make permissions for: "+channel.name)});
+	*/
+	await channel.updateOverwrite(channel.guild.id, {VIEW_CHANNEL: true })
+	.then(() =>  {
+		msg.reply("Success, `everyone` allowed read for *"
+			+channel.toString()+"*");
+	})
+	.catch(() => {console.log("failed to make permissions for: "
+		+channel.name)});;
 }
 
 /*
@@ -199,7 +304,7 @@ async function verifiedMemberList(emailto, msg){
 		})
 	}; 
 	
-	sendEmail(str, emailto, msg, 'verified members list sent.');
+	sendEmail(str, emailto, msg, 'Verified members list sent.');
 }
 
 /**
@@ -378,7 +483,7 @@ async function doVerify(msg, email){
 		aberuid: email,
 		status: "unverified", 
 		code: randomcode,
-		discordid: guildid
+		registerguildid: guildid
 	}
 	
 	storeVerificationInfo(verdata);
@@ -388,7 +493,7 @@ async function doVerify(msg, email){
 	
 	sendEmail("Please verify by sending the following line as a Direct Message to the Aber Verify bot:\n\n"
 		+ "!verify-code "+randomcode, emailaddr, msg, 
-		'please read your aber email for the verfication code.');
+		'Please read your aber email for the verfication code.');
 }
 
 /**
@@ -416,7 +521,7 @@ async function processCode(msg, code, client){
 	
 	// if it is a DM then need to find the guild that was stored with the verification code
 	if (!guild) {
-		guild = client.guilds.cache.get(verdata.discordid);
+		guild = client.guilds.cache.get(verdata.registerguildid);
 	}
 	//console.log("guild "+JSON.stringify(guild, null, 2));
 		
@@ -476,7 +581,7 @@ function sendEmail(data, email, msg, reply){
 					.catch(console.error);
 			} else {
 				console.log('Email sent: ' + info.response);
-				msg.author.send('Please read your Aber email for the verfication code.')
+				msg.author.send(reply)
 				//msg.reply('please read your aber email for the verfication code.')
 				//msg.reply(reply)
 					.catch(console.error);
@@ -558,7 +663,10 @@ async function unVerify(msg, whoid){
 			storeVerificationInfo(verdata);
 			
 		} else {
-			console.log("Couldn't find the member to unverify :"+whoid);
+			console.log("Couldn't find the member to unverify :"
+			+whoid
+			+" .You must use the members numeric discord ID. "
+			+ "Right click on their icon and use CopyID and past it in!");
 			
 			msg.author.send("Couldn't find the member to unverify :"+whoid)
 				.catch(console.error);
@@ -663,6 +771,8 @@ module.exports = {
 	addAllVerifiedMembersToRole : addAllVerifiedMembersToRole,
 	allocatRoleIfVerified : allocatRoleIfVerified,
 	makeVerifiedChannel : makeVerifiedChannel,
+	makeAllchannelsVerified : makeAllchannelsVerified,
+	makeNoChannelsVerified : makeNoChannelsVerified,
 	unVerify : unVerify,
 	addStaff : addStaff,
 	verifiedMemberList : verifiedMemberList
