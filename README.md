@@ -12,7 +12,7 @@ email.json
 
 
 # Bot commands
-Verify bot commands are: 
+```Verify bot commands are: 
 
 !verify uid                        Use your Aber user id (uid). e.g. abc12
                                    then look for an email in your aber email
@@ -33,4 +33,4 @@ Authorised staff only:
                                    (Applies to all servers)
 
 verify-addstaff uid                Add a new staff member
-Problems, suggestions, authorisation  email: nns@aber.ac.uk
+Problems, suggestions, authorisation  email: nns@aber.ac.uk```
