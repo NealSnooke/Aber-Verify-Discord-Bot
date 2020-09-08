@@ -13,7 +13,7 @@ email.json - the email account credentials (not my real ones here!)
 
 aber_verify is a folder that will hold a file for each user who is verified or is in the process of being verified.
 
-aber_verify/admin.json - the aber userids of admin people this file needs to be carefully edited on the server to add new admins.
+aber_verify/admin.json - the aber userids of admin people this file needs to be carefully edited on the bot hosting server to add new admins.
 
 aber_verify/staff.json - the list of authorised staff userids. Admins can use the !verify-addstaff to add people.
 
