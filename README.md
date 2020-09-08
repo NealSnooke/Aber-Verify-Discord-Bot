@@ -2,7 +2,7 @@
 Bot to perform user verification based on aber.ac.uk email account. It uses the Discord.js API. 
 For technical and set up details see *README Aber Verify.txt*
 
-#Files:
+# Files:
 botverify.js - code entry point and command interpreter
 
 toolsverify.js - the main functionality
