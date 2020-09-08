@@ -38,5 +38,4 @@ Authorised staff only:
 !unverify discord-uid              Remove the specified users aber-verified status
                                    (Applies to all servers)
 
-!verify-addstaff uid                Add a new staff member
-Problems, suggestions, authorisation  email: nns@aber.ac.uk```
+!verify-addstaff uid                Add a new staff member```
