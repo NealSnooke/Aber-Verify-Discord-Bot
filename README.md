@@ -7,11 +7,9 @@ botverify.js - code entry point and command interpreter
 
 toolsverify.js - the main functionality
 
-auth.json - the Discord bot credentials
+auth.json - the Discord bot credentials (not my real ones here!)
 
-email.json - the email account credentials
-
-README Aber Verify.txt - information about setting up the bot.
+email.json - the email account credentials (not my real ones here!)
 
 aber_verify is a folder that will hold a file for each user who is verified or is in the process of being verified.
 aber_verify/admin.json - the aber userids of admin people this file needs to be carefully edited on the server to add new admins.
