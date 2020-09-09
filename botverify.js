@@ -36,9 +36,6 @@ const helptext = "```Verify bot commands are: \n\n"
 	+"```"
 //	+"verify-addstaff aber-uid           authorise staff member for unverify"
 
-//this is where all the muddy points data for all servers is stored
-//var muddypoints = []; 
-
 const Discord = require('discord.js');
 const client = new Discord.Client();
 const auth = require('./auth.json');
