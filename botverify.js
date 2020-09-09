@@ -1,16 +1,9 @@
 // Muddy points bot by Neal Snooke 3/8/2020
 
-//https://discord.js.org/#/docs/main/stable/class/Message
-//https://discord.js.org/#/docs/main/stable/class/Client
-// cd 
-//intro guide
-//https://discordjs.guide
-
-//full api docs
+//full discord api docs for reference
 //https://discord.js.org/#/docs/main/master/general/welcome
 
-
-// Muddy points Discord bot by Neal Snooke 03/08/2020
+// Verify Discord bot by Neal Snooke 03/08/2020
 
 // Note that many of the commands need to be issues in a server channel since they
 // request information about a server member
