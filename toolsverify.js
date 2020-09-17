@@ -10,6 +10,7 @@ const AdminListFile = `aber_verify/admin.json`;
 
 const emailservice = 'gmail';
 const verifyRoleName = "verified";
+const verifyChannelName = 'verify-newcomers'
 
 async function allocateRoleToUser(role, guild, memberid){
 	
@@ -73,19 +74,82 @@ async function makeAllchannelsVerified(msg, server){
 	
 	server = msg.guild;
 	
+	
+	// force the creation of the verified role if it doesnt exits yet
+	// because... https://zellwk.com/blog/async-await-in-loops/
+	verifyRole = await getVerifyRole(msg.guild);
+	
 	msg.guild.channels.cache.forEach(
-		channel => {
+		async channel => {
 			if (!channel.name.includes('verify')){
-			console.log(`Channel:`+channel.name);
-			console.log(JSON.stringify(channel.permissionOverwrites, null, 2)) 
-			//  JSON.stringify(channel, null, 2));
-			setVerifyPermission(msg, channel);
+				//console.log(`Channel:`+channel.name);
+				//console.log(JSON.stringify(channel.permissionOverwrites, null, 2)) 
+				//JSON.stringify(channel, null, 2));
+				await setVerifyPermission(msg, channel);
 			}
 		}
 	)
 	
-	//for (var i = 0; i < server.channels.array().length; i++) {
-   // server.channels.array()[i].delete();
+	// find the 'newcomers' channel 
+	
+	let newcomers = undefined;
+	
+	for (var i = 0; i < msg.guild.channels.cache.array().length; i++) {
+		 //console.log("x "+msg.guild.channels.cache.array()[i].name);
+
+		 var chan = msg.guild.channels.cache.array()[i];
+		 
+		 if (chan.name.includes('verify')){
+		 	//reset its permissions
+		 	console.log("Reset permissions for "+chan.name);
+
+		 	newcomers = chan;
+		 	
+		 	await chan.updateOverwrite(chan.guild.id, {VIEW_CHANNEL: true })
+			.then(() =>  {
+				msg.reply(
+				"Success, `everyone` granted read for *"+chan.toString()+"*");
+			})
+			.catch(
+			() => {console.log(
+				"Failed to make everyone permissions for: "+chan.name);});
+
+			await chan.updateOverwrite(verifyRole, {VIEW_CHANNEL: false })
+			.then(() =>  {
+				msg.reply("Success, `verifed` role read permission disabled for *"
+					+chan.toString()+"*");
+			})
+			.catch(() => {console.log("failed to make verified role permissions for: "
+				+chan.name)});;
+		 }
+	}
+	
+	// create the newcomers channel if necessary
+	if (!newcomers) {
+		server.channels.create(verifyChannelName, {
+		type : 'text',
+		permissionOverwrites: [
+			{id: chan.guild.id,
+			 allow: 'VIEW_CHANNEL',
+			},
+			{id: verifyRole,
+			 deny: 'VIEW_CHANNEL',
+			}
+		]
+		})
+		.then(newchan =>  {
+				msg.reply("`verify` channel not found so *"
+					+verifyChannelName+"* created");
+				newchan.send(
+				"To gain access to this server please verify by sending the message: \n`!verify <uid>` \n where <uid> is your **Aber user id** such as abc12 ");
+			})
+		.catch(() => {console.log("Failed to make verify role permissions for: " 
+			+verifyChannelName)});
+	}
+	
+	// create it if it doesnt exist 
+	
+	// reset its permissions
 }
 
 /*
@@ -283,7 +347,9 @@ async function verifiedMemberList(emailto, msg){
 		
 			if (verdata) {
 				//str += member.id+" "+verdata.aberuid+"\n";
-				str += member.displayName+" ("+verdata.status+")\n";
+				str += member.displayName
+				+", "+member.user.tag
+				+" ("+verdata.status+")\n";
 			}
 		
 			console.log(str);
@@ -297,7 +363,11 @@ async function verifiedMemberList(emailto, msg){
 
 			if (verdata) {
 				//str += member.id+" "+verdata.aberuid+"\n";
-				str += member.displayName+", "+verdata.aberuid+" ("+verdata.status+")\n";
+				str += member.displayName
+					+", "+verdata.aberuid
+					+", "+member.user.tag
+					//+", "+member.user.username
+					+" ("+verdata.status+")\n";
 			}
 
 			console.log(str);
@@ -708,7 +778,7 @@ function findStaffList(ListFile){
 }
 
 /*
- * add a member of staff (ONLY I can do this ATM)
+ * add a member of staff, other staff can do this
  * 07092020 now anyone in the aber_verify/admin.json list can
  * that list needs editing by hand, so must be done by someone
  * with write permissions on the bots host machine.
