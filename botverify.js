@@ -1,4 +1,16 @@
-// Verify Discord bot by Neal Snooke 03/08/2020
+// Muddy points bot by Neal Snooke 3/8/2020
+
+//https://discord.js.org/#/docs/main/stable/class/Message
+//https://discord.js.org/#/docs/main/stable/class/Client
+// cd 
+//intro guide
+//https://discordjs.guide
+
+//full api docs
+//https://discord.js.org/#/docs/main/master/general/welcome
+
+
+// Muddy points Discord bot by Neal Snooke 03/08/2020
 
 // Note that many of the commands need to be issues in a server channel since they
 // request information about a server member
@@ -9,7 +21,7 @@
 
 const prefix = '!'; //prefix for this servers commands
 const alumniPerson = "afc@aber.ac.uk";
-
+const verifyRoleName = "verified"; // make sure this is updates in toolsverify.js also...
 
 const helptext = "```Verify bot commands are: \n\n"
 	+"!verify uid                        Use your Aber user id (uid). e.g. abc12\n"
@@ -35,6 +47,9 @@ const helptext = "```Verify bot commands are: \n\n"
 	+"email: nns@aber.ac.uk              Problems, suggestions, authorisation.  "
 	+"```"
 //	+"verify-addstaff aber-uid           authorise staff member for unverify"
+
+//this is where all the muddy points data for all servers is stored
+//var muddypoints = []; 
 
 const Discord = require('discord.js');
 const client = new Discord.Client();
@@ -158,11 +173,14 @@ client.on('message', msg => {
 			
 			tools.makeVerifiedChannel(args[0], msg);
 		}
-		
+
 	} else if (command === 'unverify'){ 
 	
 		tools.unVerify(msg, args[0]); 
 		
+	} else if (command === 'verify-role-delete'){
+		removeVerifiedRole(msg.guild, msg);
+
 	} else if (command === 'verify-addstaff'){ 
 	
 		tools.addStaff(args[0], msg); 
@@ -236,6 +254,30 @@ client.on('guildMemberAdd', member => {
 		.catch(console.error);
 	});
 });
+
+async function removeVerifiedRole(guild, msg){
+	function findVerifyRole(r) {
+		return r.name === verifyRoleName;
+	}
+	
+	roles = await guild.roles.fetch();
+	console.log(`There are ${roles.cache.size} roles.`+JSON.stringify(roles, null, 2));
+	
+	let role1 = guild.roles.cache.find(findVerifyRole);
+	//console.log(JSON.stringify("ROLE1 "+role1, null, 2));
+	
+	while (role1){
+		console.log("role found")
+		
+		msg.reply("Deleting role: "+role1.name+" ("+role1.id+")");
+		await role1.delete()
+
+		role1 = guild.roles.cache.find(findVerifyRole);
+		
+
+		console.log(JSON.stringify("ROLE1 "+role1, null, 2));
+	}
+}
 
 /**
  *
