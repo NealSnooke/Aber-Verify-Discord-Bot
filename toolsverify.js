@@ -140,9 +140,14 @@ async function makeAllchannelsVerified(msg, server){
 		.then(newchan =>  {
 				msg.reply("`verify` channel not found so *"
 					+verifyChannelName+"* created");
+					
 				newchan.send(
-				"To gain access to this server please verify by sending the message: \n`!verify <uid>` \n where <uid> is your **Aber user id** such as abc12 ");
-			})
+				"To gain access to this server please verify by posting the following message in this channel: \n`!verify <uid>` \n where <uid> is your **Aber user id** such as abc12 ")
+				.then((m) => {
+					m.pin();
+				})
+				
+		})
 		.catch(() => {console.log("Failed to make verify role permissions for: " 
 			+verifyChannelName)});
 	}

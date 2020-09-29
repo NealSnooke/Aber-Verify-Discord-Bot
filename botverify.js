@@ -43,13 +43,30 @@ const helptext = "```Verify bot commands are: \n\n"
 	+"Authorised staff only:\n\n"
 	+"!unverify discord-uid              Remove the specified users aber-verified status\n"
 	+"                                   (Applies to all servers)\n\n" 
-	+"!verify-addstaff uid               Add a new staff member\n"
+	+"!verify-addstaff uid               Add a new staff member (bot owner only)\n"
+	+"!verify-privacy-policy             View the privacy policy\n"
 	+"email: nns@aber.ac.uk              Problems, suggestions, authorisation.  "
 	+"```"
 //	+"verify-addstaff aber-uid           authorise staff member for unverify"
 
 //this is where all the muddy points data for all servers is stored
 //var muddypoints = []; 
+const privtext = "**Privacy Policy**.\n\n"
++	"**Summary of the purpose of the bot**\n"
++	"The AberVerify bot (hereafter bot) is used to restrict server access to student and staff members of Aberystwyth  University.\n\n"
+
++	"**Information the Aber Verify bot collects.**\n"
++	"The bot collects your Aberystwyth Username and the Discord account ID used for the verification. \n\n"
+
++	"**Where the information is stored and processed**\n"
++	"The bot stores and processes the information on a University server run by the department of Computer Science.\n\n"
+
++	"**Use of your information**\n"
++	"The AberVerify bot uses the information to enable instant verification in other Aberystwyth University servers that use the bot. This information can be made available to selected members of Aberystwyth staff and members of Aberystwyth University who run or maintain these University Discord servers.\n\n"
++	"This information can be used to determine the aber UID of a member of a server using the AberVerify bot for the purposes of tracing inappropriate behaviour or for reasons related to the teaching activities of the University carried out on the server. \n\n" 
++	"The information collected will not be disclosed to any third party outside of Aberystwyth University. "
+
+
 
 const Discord = require('discord.js');
 const client = new Discord.Client();
@@ -191,7 +208,10 @@ client.on('message', msg => {
 			return
 		}
 		tools.verifiedMemberList(args[0], msg);
+	} else if (command === 'verify-privacy-policy'){
+		msg.author.send(privtext);
 	}
+	
 });
 
 /*
