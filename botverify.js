@@ -26,9 +26,10 @@ const verifyRoleName = "verified"; // make sure this is updates in toolsverify.j
 const helptext = "```Verify bot commands are: \n\n"
 	+"!verify uid                        Use your Aber user id (uid). e.g. abc12\n"
 	+"                                   then look for an email in your aber email\n"
-	+"!verify-code validation-code       Use the code sent to your aber email.\n\n"
-	+"!verify-alumni                     Use this if you dont have a current aber email.\n\n"
-	+"Server owner only:\n\n"
+	+"!verify-code validation-code       Use the code sent to your Aber email.\n\n"
+	+"!verify-alumni                     Use this if you don't have a current aber email.\n\n"
+	+"!verify-privacy-policy             View the privacy policy.\n\n"
+	+"Server owner or Admin role only:\n\n"
 	+"!verify-channel channel-name       Restrict the specified channel to verified users.\n"
 	+"                                   Accepts channel textual name, channel mention\n" 
 	+"                                   or channel ID.\n"
@@ -38,13 +39,14 @@ const helptext = "```Verify bot commands are: \n\n"
 
 	+"!verify-role                       Reconstruct the verified role members\n"
 	+"                                   e.g. if role is accidently deleted.\n"
+	+"!verify-role-delete                Delete the verified role.\n"
 	+"!verify-list email-adddress        Send the list of verified members for a server\n\n"
 	
 	+"Authorised staff only:\n\n"
 	+"!unverify discord-uid              Remove the specified users aber-verified status\n"
 	+"                                   (Applies to all servers)\n\n" 
-	+"!verify-addstaff uid               Add a new staff member (bot owner only)\n"
-	+"!verify-privacy-policy             View the privacy policy\n"
+	+"!verify-addstaff uid               Add a new staff member (bot owner only)\n\n"
+
 	+"email: nns@aber.ac.uk              Problems, suggestions, authorisation.  "
 	+"```"
 //	+"verify-addstaff aber-uid           authorise staff member for unverify"
@@ -156,7 +158,7 @@ client.on('message', msg => {
 		"Please send an email to "+alumniPerson+" including your discord name (e.g JohnSmith#1234) and we will add you. Include your name and if possible the year you graduated. It may take a day or two to do this if we are busy.");
 		
 	} else if (command === 'verify-role'){
-		if (msg.author.id != msg.guild.ownerID){
+		if (tools.checkAdminOrOwnerSender(msg)){
 			msg.author.send("Sorry - only server owner allowed recreate the aber-verified role")
 			.catch(console.error);
 			return
@@ -172,11 +174,8 @@ client.on('message', msg => {
 		//console.log("owner"+JSON.stringify(msg.guild.ownerID, null, 2));
 		//console.log("user"+JSON.stringify(msg.author.id, null, 2));
 
-		//only server owner allowed
-		if (msg.author.id != msg.guild.ownerID){
-			msg.author.send("Sorry - only server owner allowed to make verified channels!");
-			return
-		}
+		//only server owner or admin allowed
+		if (!tools.checkAdminOrOwnerSender(msg)) return;
 		
 		if (args[0]==='ALL'){
 		
@@ -196,18 +195,18 @@ client.on('message', msg => {
 		tools.unVerify(msg, args[0]); 
 		
 	} else if (command === 'verify-role-delete'){
-		removeVerifiedRole(msg.guild, msg);
+		if (tools.checkAdminOrOwnerSender(msg)){
+			removeVerifiedRole(msg.guild, msg);
+		}
 
 	} else if (command === 'verify-addstaff'){ 
 	
 		tools.addStaff(args[0], msg); 
 		
 	} else if (command === 'verify-list'){
-		if (msg.author.id != msg.guild.ownerID){
-			msg.author.send("Sorry - only server owner allowed to get the list of verified members");
-			return
+		if (tools.checkAdminOrOwnerSender(msg)){
+			tools.verifiedMemberList(args[0], msg);
 		}
-		tools.verifiedMemberList(args[0], msg);
 	} else if (command === 'verify-privacy-policy'){
 		msg.author.send(privtext);
 	}
@@ -298,6 +297,7 @@ async function removeVerifiedRole(guild, msg){
 		console.log(JSON.stringify("ROLE1 "+role1, null, 2));
 	}
 }
+
 
 /**
  *
