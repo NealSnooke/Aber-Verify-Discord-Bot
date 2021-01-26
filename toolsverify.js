@@ -664,6 +664,8 @@ function sendEmail(data, email, msg, reply){
 		});
 }
 
+
+
 /*
  * check if the user is listed as an Aber staff member
  */
@@ -716,7 +718,7 @@ async function unVerify(msg, whoid){
 	if (!checkStaffSender(msg, StaffListFile)){
 		console.log("Not a staff member :");
 		
-		msg.author.send(`You do not have permission to use !unverify`)
+		msg.author.send(`You do not have permission to use !unverify. Ask nns@aber.ac.uk`)
 				.catch(console.error);
 	} else {
 		// so we can remove the verification
@@ -836,6 +838,25 @@ function findChannel(server, channelName) {
 	return category;
 }
 
+
+/*
+ * check Admin or owner
+ */
+function checkAdminOrOwnerSender(msg){
+
+	if (msg.author.id == msg.guild.ownerID ||
+		msg.member.roles.cache.some(role => role.name === "Admin") ||
+		msg.member.roles.cache.some(role => role.name === "Admin role") ||
+		msg.member.roles.cache.some(role => role.name === "admin")
+		){
+		return true; 
+	}
+			
+	msg.author.send("Sorry - only *Admin* role or server owner allowed to do that");
+	
+	return false;
+}
+
 /**
  * the externally visable functions
  */
@@ -850,5 +871,6 @@ module.exports = {
 	makeNoChannelsVerified : makeNoChannelsVerified,
 	unVerify : unVerify,
 	addStaff : addStaff,
-	verifiedMemberList : verifiedMemberList
+	verifiedMemberList : verifiedMemberList,
+	checkAdminOrOwnerSender : checkAdminOrOwnerSender
 }; //end module.exports
